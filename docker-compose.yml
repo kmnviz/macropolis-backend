@@ -1,0 +1,12 @@
+version: '3.5'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: lisenmi-backend
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - 8000:8000
