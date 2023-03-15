@@ -27,5 +27,5 @@ Conventions
   - stored in dollar cents (e.g. price is $1.00 we store 100 as integer in db)
 
 Dependencies
-- axios - api calls
 - formidable - post form data handling
+- mongodb - database

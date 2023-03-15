@@ -4,6 +4,7 @@ const http = require('http');
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const formidable = require('formidable');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -34,6 +35,7 @@ const routes = require('./routes');
         process.exit(1);
     }
 
+    app.use(cookieParser());
     app.use((req, res, next) => {
         req.dbClient = dbClient;
         req.db = dbClient.db(process.env.DB_NAME);
