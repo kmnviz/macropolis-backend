@@ -10,6 +10,7 @@ const app = express();
 const httpServer = http.createServer(app);
 const httpPort = process.env.HTTP_PORT;
 const routes = require('./routes');
+const GoogleCloudPubSubClient = require('./clients/googleCloudPubSubClient');
 
 (async() => {
     if (!httpPort) {
@@ -43,6 +44,9 @@ const routes = require('./routes');
         next();
     });
     app.use('/', routes);
+
+    const googleCloudPubSubClient = new GoogleCloudPubSubClient();
+    await googleCloudPubSubClient.subscribeToAudioConversionFinishedEvent(dbClient.db(process.env.DB_NAME).collection('items'));
 
     httpServer.listen(httpPort, async () => {
         console.log(`App listening at port ${httpPort}`);

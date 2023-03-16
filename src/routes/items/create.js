@@ -16,6 +16,10 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             });
         }
 
+        if (!fields?.name || !fields?.price || !files?.image || !files.audio) {
+            return res.status(422).json({ message: 'Missing parameter' });
+        }
+
         const record = {};
 
         const imageManager = new ImageManager();
@@ -39,46 +43,49 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
         const googleCloudStorageClient = new GoogleCloudStorageClient();
         const uploadImagePromises = Object.keys(resizedImageResponse.outputs)
             .map((key) => {
-                const filename = `${newImageFilename}_${key}.${imageFileExtension}`;
+                const filename = `${key}_${newImageFilename}.${imageFileExtension}`;
                 const file = googleCloudStorageClient.imagesBucket.file(filename);
                 const stream = file.createWriteStream({ resumable: false });
                 return new Promise((resolve, reject) => {
                     stream.on('error', (error) => { reject(error); });
-                    stream.on('finish', () => {resolve()});
+                    stream.on('finish', () => { resolve() });
                     stream.end(resizedImageResponse.outputs[key]);
                 });
             });
 
-        const audioBuffer = fs.readFileSync(files.audio.filepath);
         const newAudioFilename = crypto.randomBytes(28).toString('hex');
         const audioFileExtension = files.audio.originalFilename.split('.').pop();
-        const filename = `${newAudioFilename}.${audioFileExtension}`;
-        const file = googleCloudStorageClient.audioBucket.file(filename);
-        const stream = file.createWriteStream({ resumable: false });
+        const audioFilename = `${newAudioFilename}.${audioFileExtension}`;
+        const audioFile = googleCloudStorageClient.audioBucket.file(audioFilename);
+        const audioStream = fs.createReadStream(files.audio.filepath);
         const uploadAudioPromise = new Promise((resolve, reject) => {
-            stream.on('error', (error) => { reject(error); });
-            stream.on('finish', () => {resolve()});
-            stream.end(audioBuffer);
+            let uploadedBytes = 0;
+            audioStream.on('data', (chunk) => {
+                uploadedBytes += chunk.length;
+                const progress = Math.round((uploadedBytes / fs.statSync(files.audio.filepath).size) * 100);
+                // TODO: handle upload progress further
+                // console.log(`Progress: ${progress}%`);
+            });
+            audioStream.pipe(audioFile.createWriteStream())
+                .on('error', () => { reject() })
+                .on('finish', () => { resolve() });
         });
 
         try {
             await Promise.all([...uploadImagePromises, uploadAudioPromise]);
-            record.image = newImageFilename;
-            record.audio = newAudioFilename;
+            record.image = `${newImageFilename}.${imageFileExtension}`;
+            record.audio = `${newAudioFilename}.${audioFileExtension}`;
         } catch (error) {
             return res.status(400).json({
                 message: 'Something terribly went wrong'
             });
         }
 
-        record.updated_at = Date.now();
+        record.user_id = req.user.id;
+        record.created_at = Date.now();
 
         try {
-            await req.db.collection('items').updateOne(
-                { user_id: req.user.id },
-                { $set: record, $setOnInsert: { created_at: Date.now() } },
-                { upsert: true }
-            );
+            await req.db.collection('items').insertOne(record);
 
             return res.status(200).json({
                 data: { username: req.user.username },

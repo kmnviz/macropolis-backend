@@ -32,19 +32,19 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             const googleCloudStorageClient = new GoogleCloudStorageClient();
             const uploadImagePromises = Object.keys(resizedImageResponse.outputs)
                 .map((key) => {
-                    const filename = `${newFilename}_${key}.${fileExtension}`;
+                    const filename = `${key}_${newFilename}.${fileExtension}`;
                     const file = googleCloudStorageClient.imagesBucket.file(filename);
                     const stream = file.createWriteStream({ resumable: false });
                     return new Promise((resolve, reject) => {
                         stream.on('error', (error) => { reject(error); });
-                        stream.on('finish', () => {resolve()});
+                        stream.on('finish', () => { resolve() });
                         stream.end(resizedImageResponse.outputs[key]);
                     });
                 });
 
             try {
                 await Promise.all(uploadImagePromises);
-                record.avatar = newFilename;
+                record.avatar = `${newFilename}.${fileExtension}`;
             } catch (error) {
                 return res.status(400).json({
                     message: 'Something terribly went wrong'
@@ -52,15 +52,16 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             }
         }
 
+        const now = Date.now();
         if (fields?.name) record.name = fields.name;
         if (fields?.biography) record.biography = fields.biography;
         if (fields?.country) record.country = fields.country;
-        record.updated_at = Date.now();
+        record.updated_at = now;
 
         try {
             await req.db.collection('profiles').updateOne(
                 { user_id: req.user.id },
-                { $set: record, $setOnInsert: { created_at: Date.now() } },
+                { $set: record, $setOnInsert: { created_at: now } },
                 { upsert: true }
             );
 

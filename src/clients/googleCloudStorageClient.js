@@ -5,8 +5,8 @@ class GoogleCloudStorageClient {
     constructor() {
         this._client = new Storage({
             credentials: {
-                client_email: process.env.GCP_AUTH_STORAGE_EMAIL,
-                private_key: process.env.GCP_AUTH_STORAGE_PRIVATE_KEY,
+                client_email: process.env.GCP_AUTH_SERVICE_ACCOUNT_EMAIL,
+                private_key: process.env.GCP_AUTH_SERVICE_ACCOUNT_PRIVATE_KEY,
             }
         });
     }
