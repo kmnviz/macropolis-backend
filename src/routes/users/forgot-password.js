@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const express = require('express');
+const MailManager = require("../../services/mailManager");
 const routes = express.Router();
 
 routes.post('/', async (req, res) => {
@@ -33,6 +34,7 @@ routes.post('/', async (req, res) => {
                     {
                         $set: {
                             hash: crypto.randomBytes(28).toString('hex'),
+                            created_at: Date.now()
                         },
                     },
                     {
@@ -41,7 +43,12 @@ routes.post('/', async (req, res) => {
                     }
                 );
 
-                // await sendMail(fields.email, restorePasswordHash.value.hash);
+                const mailManager = new MailManager();
+                try {
+                    await mailManager.sendRestorePasswordLinkRequest(fields.email, restorePasswordHash.value.hash);
+                } catch (error) {
+                    console.log(`Failed to send restore password mail to ${fields.email}`);
+                }
 
                 return res.status(200).json({
                     data: { email: fields.email },

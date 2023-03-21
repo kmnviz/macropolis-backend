@@ -2,8 +2,9 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const express = require('express');
 const routes = express.Router();
+const MailManager = require('../../services/mailManager');
 
-const reservedUsernames = ['sign-in', 'sign-up', 'forgot-password', 'checkout'];
+const reservedUsernames = ['sign-in', 'sign-up', 'forgot-password', 'checkout', 'dashboard'];
 
 routes.post('/', async (req, res) => {
 
@@ -28,7 +29,7 @@ routes.post('/', async (req, res) => {
 
             if (user || reservedUsernames.includes(fields.username)) {
                 return res.status(409).json({
-                    message: 'Sorry, but username or email is already used'
+                    message: 'Sorry, but username or email are already in use'
                 });
             }
 
@@ -41,7 +42,13 @@ routes.post('/', async (req, res) => {
                 confirmation_hash: confirmationHash,
                 created_at: Date.now(),
             });
-            // await sendMail(fields.email, fields.username, confirmationHash);
+
+            const mailManager = new MailManager();
+            try {
+                await mailManager.sendSignUpConfirmationRequest(fields.email, fields.username, confirmationHash);
+            } catch (error) {
+                console.log(`Failed to send sign up confirmation mail to ${fields.email}`);
+            }
 
             return res.status(200).json({
                 data: { username: fields.username },

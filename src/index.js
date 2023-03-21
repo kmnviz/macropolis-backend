@@ -2,11 +2,15 @@ require('dotenv').config();
 
 const http = require('http');
 const express = require('express');
+const cors = require('cors');
 const { MongoClient } = require('mongodb');
 const formidable = require('formidable');
 const cookieParser = require('cookie-parser');
 
 const app = express();
+app.use(cookieParser());
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+
 const httpServer = http.createServer(app);
 const httpPort = process.env.HTTP_PORT;
 const routes = require('./routes');
@@ -36,7 +40,6 @@ const GoogleCloudPubSubClient = require('./clients/googleCloudPubSubClient');
         process.exit(1);
     }
 
-    app.use(cookieParser());
     app.use((req, res, next) => {
         req.dbClient = dbClient;
         req.db = dbClient.db(process.env.DB_NAME);

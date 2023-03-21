@@ -1,7 +1,7 @@
 const express = require('express');
 const routes = express.Router();
 
-const reservedUsernames = ['sign-in', 'sign-up', 'forgot-password', 'checkout'];
+const reservedUsernames = ['sign-in', 'sign-up', 'forgot-password', 'checkout', 'dashboard'];
 
 routes.get('/', async (req, res) => {
 

@@ -17,7 +17,15 @@ routes.post('/', async (req, res) => {
         }
 
         try {
-            const user = await req.db.collection('users').findOne({ username: fields.username });
+            const user = await req.db.collection('users').findOne({
+                username: fields.username,
+            });
+
+            if (user && !user.confirmed) {
+                return res.status(401).json({
+                    message: 'Not authorized'
+                });
+            }
 
             if (!user || !(await bcrypt.compare(fields.password, user.password))) {
                 return res.status(401).json({

@@ -50,6 +50,8 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                     message: 'Something terribly went wrong'
                 });
             }
+        } else {
+            record.avatar = ''
         }
 
         const now = Date.now();
@@ -60,7 +62,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
         try {
             await req.db.collection('profiles').updateOne(
-                { user_id: req.user.id },
+                { username: req.user.username },
                 { $set: record, $setOnInsert: { created_at: now } },
                 { upsert: true }
             );
