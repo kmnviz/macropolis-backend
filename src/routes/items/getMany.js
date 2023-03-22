@@ -1,17 +1,16 @@
 const express = require('express');
 const routes = express.Router();
-const { ObjectId } = require('mongodb');
 
 routes.get('/', async (req, res) => {
 
-    if (!req.query?.id) {
+    if (!req.query?.username) {
         return res.status(422).json({ message: 'Missing parameter' });
     }
 
     try {
-        const item = await req.db.collection('items').findOne(
+        const items = await req.db.collection('items').find(
             {
-                _id: new ObjectId(req.query.id)
+                username: req.query.username,
             },
             {
                 projection: {
@@ -20,14 +19,13 @@ routes.get('/', async (req, res) => {
                     user_id: 0,
                 }
             }
-        );
+        ).toArray();
 
         return res.status(200).json({
-            data: { item: item },
+            data: { items: items },
             message: 'Items were fetched'
         });
     } catch (error) {
-        console.log('error', error);
         return res.status(400).json({
             message: 'Something went wrong'
         });

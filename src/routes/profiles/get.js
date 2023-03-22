@@ -22,12 +22,6 @@ routes.get('/', async (req, res) => {
             }
         );
 
-        if (!profile) {
-            return res.status(404).json({
-                message: 'Not found'
-            });
-        }
-
         return res.status(200).json({
             data: { profile: profile },
             message: 'Profile was fetched'
