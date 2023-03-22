@@ -39,6 +39,18 @@ class GoogleCloudStorageClient {
         return `https://storage.googleapis.com/${process.env.GCP_STORAGE_AUDIO_BUCKET}`;
     }
 
+    get audioPreviewBucket() {
+        return this._client.bucket(process.env.GCP_STORAGE_AUDIO_PREVIEW_BUCKET);
+    }
+
+    get audioPreviewBucketName() {
+        return process.env.GCP_STORAGE_AUDIO_PREVIEW_BUCKET;
+    }
+
+    get audioPreviewBucketPath() {
+        return `https://storage.googleapis.com/${process.env.GCP_STORAGE_AUDIO_PREVIEW_BUCKET}`;
+    }
+
     async generateSignedUrl(filename, fileExtension) {
         const options = {
             version: 'v4',

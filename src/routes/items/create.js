@@ -82,6 +82,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
         }
 
         record.user_id = req.user.id;
+        record.username = req.user.username;
         if (fields?.name) record.name = fields.name;
         if (fields?.price) record.price = fields.price;
         record.created_at = Date.now();

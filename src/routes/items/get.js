@@ -8,29 +8,22 @@ routes.get('/', async (req, res) => {
     }
 
     try {
-        const profile = await req.db.collection('profiles').findOne(
+        const items = await req.db.collection('items').find(
             {
                 username: req.query.username,
             },
             {
                 projection: {
-                    _id: 0,
-                    username: 1,
-                    name: 1,
-                    avatar: 1,
+                    created_at: 0,
+                    audio: 0,
+                    user_id: 0,
                 }
             }
-        );
-
-        if (!profile) {
-            return res.status(404).json({
-                message: 'Not found'
-            });
-        }
+        ).toArray();
 
         return res.status(200).json({
-            data: { profile: profile },
-            message: 'Profile was fetched'
+            data: { items: items },
+            message: 'Items were fetched'
         });
     } catch (error) {
         return res.status(400).json({

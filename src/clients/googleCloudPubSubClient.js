@@ -19,7 +19,7 @@ class GoogleCloudPubSubClient {
             try {
                 await itemsDatabaseCollection.updateOne(
                     { audio: data.name },
-                    { $set: { preview: `${data.name.split('.').shift()}.mp3` } }
+                    { $set: { audio_preview: `${data.name.split('.').shift()}.mp3` } }
                 );
                 await message.ack();
             } catch (error) {
