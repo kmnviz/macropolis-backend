@@ -51,18 +51,18 @@ class GoogleCloudStorageClient {
         return `https://storage.googleapis.com/${process.env.GCP_STORAGE_AUDIO_PREVIEW_BUCKET}`;
     }
 
-    async generateSignedUrl(filename, fileExtension) {
+    async generateAudioSignedUrl(name, extension) {
+
         const options = {
             version: 'v4',
             action: 'read',
             expires: Date.now() + 60 * 60 * 999 * 24 * 7, // 7 days
             virtualHostedStyle: true,
-            promptSaveAs: `${filename}.${fileExtension}`
+            promptSaveAs: `${name}.${extension}`
         };
 
-        const [url] = await this._client
-            .bucket('')
-            .file(filename)
+        const [url] = await this.audioBucket
+            .file(`${name}.${extension}`)
             .getSignedUrl(options);
 
         return url;

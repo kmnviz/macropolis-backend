@@ -16,6 +16,10 @@ class StripeClient {
         return process.env.STRIPE_PUBLISHABLE_KEY;
     }
 
+    get webhookSecretKey() {
+        return process.env.STRIPE_WEBHOOK_SECRET_KEY;
+    }
+
     async createPaymentIntent(amount, metadata) {
         return await this._client.paymentIntents.create({
             amount: amount,
