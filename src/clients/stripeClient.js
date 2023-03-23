@@ -1,9 +1,9 @@
-const stripe = require('stripe');
+const Stripe = require('stripe');
 
 class StripeClient {
 
     constructor() {
-        this._client = new stripe(process.env.STRIPE_SECRET_KEY);
+        this._client = new Stripe(process.env.STRIPE_SECRET_KEY);
         this._currency = 'usd';
         this._payment_method_types = ['card'];
     }
@@ -12,15 +12,16 @@ class StripeClient {
         return this._client;
     }
 
-    async createPaymentIntent(product, username) {
+    get publishableKey() {
+        return process.env.STRIPE_PUBLISHABLE_KEY;
+    }
+
+    async createPaymentIntent(amount, metadata) {
         return await this._client.paymentIntents.create({
-            // amount: product.price,
-            // currency: this._currency,
-            // payment_method_types: this._payment_method_types,
-            // metadata: {
-            //     uuid: product.uuid,
-            //     username: username,
-            // },
+            amount: amount,
+            currency: this._currency,
+            payment_method_types: this._payment_method_types,
+            metadata: metadata
         });
     }
 
@@ -33,4 +34,4 @@ class StripeClient {
     }
 }
 
-export default StripeClient;
+module.exports = StripeClient;
