@@ -32,9 +32,6 @@ routes.post('/', async (req, res) => {
             const filename = item.audio.split('.').shift();
             const fileExtension = item.audio.split('.').pop();
 
-            console.log('filename: ', filename);
-            console.log('fileExtension: ', fileExtension);
-
             const signedUrl = await googleCloudStorageClient.generateAudioSignedUrl(filename, fileExtension);
 
             const mailManager = new MailManager();
