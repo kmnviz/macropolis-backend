@@ -6,6 +6,7 @@ const jwtVerifyMiddleware = require('../../middlewares/jwtVerify');
 const ImageManager = require('../../services/imageManager');
 const AudioManager = require('../../services/audioManager');
 const GoogleCloudStorageClient = require('../../clients/googleCloudStorageClient');
+const Decimal = require('decimal.js');
 
 routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
@@ -88,7 +89,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
         record.user_id = req.user.id;
         record.username = req.user.username;
         if (fields?.name) record.name = fields.name;
-        if (fields?.price) record.price = fields.price;
+        if (fields?.price) record.price = Decimal(fields.price).mul(100).toString();
         record.created_at = Date.now();
 
         try {
