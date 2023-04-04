@@ -20,6 +20,10 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             return res.status(422).json({ message: 'Missing parameter' });
         }
 
+        if (!/^\d+\.\d{2}$/.test(fields.price)) {
+            return res.status(422).json({ message: 'Wrong parameter' });
+        }
+
         const record = {};
 
         const imageManager = new ImageManager();
