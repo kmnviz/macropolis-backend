@@ -30,7 +30,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
         const imageManager = new ImageManager();
         const audioManager = new AudioManager();
 
-        if (!imageManager.validateImage(files.image, 1024 * 1024)) {
+        if (!imageManager.validateImage(files.image, 10240 * 10240)) {
             fs.unlinkSync(files.image.filepath);
             return res.status(422).json({ message: 'Wrong parameter' });
         }
