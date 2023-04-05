@@ -33,10 +33,17 @@ routes.post('/', async (req, res) => {
             const fileExtension = item.audio.split('.').pop();
 
             const signedUrl = await googleCloudStorageClient.generateAudioSignedUrl(filename, fileExtension);
-
             const mailManager = new MailManager();
             await mailManager.sendDownloadLink(paymentIntent.metadata.email, signedUrl, fileExtension);
             await mailManager.sendPurchasedItemMessage(user.email, item.name, item.price);
+
+            await req.db.collection('sales').insertOne({
+                user_id: user._id,
+                item_id: item._id,
+                bought_by: paymentIntent.metadata.email,
+                bought_for: item.price,
+                created_at: Date.now(),
+            });
 
             return res.status(200).json({
                 data: {},
