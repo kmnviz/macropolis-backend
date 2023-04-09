@@ -54,12 +54,12 @@ class MailManager {
         });
     }
 
-    async sendDownloadLink(email, signedUrl, fileExtension) {
+    async sendDownloadLink(email, signedUrl, fileExtension, itemId, username) {
         const mailOptions = {
             from: 'hello@lisenmi.com',
             to: email,
             subject: 'You have just bought a product from d.space',
-            html: `<p>Download file from <a href="${process.env.FRONTEND_URL}/download?downloadUrl=${encodeURIComponent(signedUrl)}&fileExtension=${fileExtension}">this link</a>. The link will be available 7 days</p>`,
+            html: `<p>Download file from <a href="${process.env.FRONTEND_URL}/download?downloadUrl=${encodeURIComponent(signedUrl)}&fileExtension=${fileExtension}&itemId=${itemId}&username=${username}">this link</a>. The link will be available 7 days</p>`,
         };
 
         await this._client.sendMail(mailOptions, (error, info) => {

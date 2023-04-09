@@ -1,7 +1,7 @@
 const express = require('express');
 const routes = express.Router();
-const { ObjectId } = require('mongodb');
-const { buffer } = require('micro');
+const {ObjectId} = require('mongodb');
+const {buffer} = require('micro');
 const StripeClient = require('../../../clients/stripeClient');
 const GoogleCloudStorageClient = require('../../../clients/googleCloudStorageClient');
 const MailManager = require('../../../services/mailManager');
@@ -18,9 +18,9 @@ routes.post('/', async (req, res) => {
             const paymentIntent = event.data.object;
 
             let item, user;
-            item = await req.db.collection('items').findOne({ _id: new ObjectId(paymentIntent.metadata.item_id) });
+            item = await req.db.collection('items').findOne({_id: new ObjectId(paymentIntent.metadata.item_id)});
             if (item) {
-                user = await req.db.collection('users').findOne({ _id: new ObjectId(item.user_id) });
+                user = await req.db.collection('users').findOne({_id: new ObjectId(item.user_id)});
             } else {
                 console.log(`Webhook for non-existing item ${paymentIntent.metadata.item_id} received. PaymentIntent: ${paymentIntent.id}`);
                 return res.status(200).json({
@@ -34,7 +34,7 @@ routes.post('/', async (req, res) => {
 
             const signedUrl = await googleCloudStorageClient.generateAudioSignedUrl(filename, fileExtension);
             const mailManager = new MailManager();
-            await mailManager.sendDownloadLink(paymentIntent.metadata.email, signedUrl, fileExtension);
+            await mailManager.sendDownloadLink(paymentIntent.metadata.email, signedUrl, fileExtension, paymentIntent.metadata.item_id, user.username);
             await mailManager.sendPurchasedItemMessage(user.email, item.name, item.price);
 
             await req.db.collection('sales').insertOne({

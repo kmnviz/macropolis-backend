@@ -19,9 +19,9 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
         if (files?.avatar) {
             const imageManager = new ImageManager();
-            if (!imageManager.validateImage(files.avatar, 1024 * 1024)) {
+            if (!imageManager.validateImage(files.avatar, 4 * 1024 * 1024)) {
                 fs.unlinkSync(files.avatar.filepath);
-                return res.status(422).json({ message: 'Wrong parameter' });
+                return res.status(422).json({ message: '' });
             }
 
             const imageBuffer = fs.readFileSync(files.avatar.filepath);
@@ -50,7 +50,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                     message: 'Something terribly went wrong'
                 });
             }
-        } else {
+        } else if (fields?.avatar === '') {
             record.avatar = ''
         }
 
