@@ -14,6 +14,7 @@ routes.post('/', async (req, res) => {
         }
 
         try {
+            const stripeClient = new StripeClient();
             const item = await req.db.collection('items').findOne({ _id: new ObjectId(fields.itemId) });
 
             if (!item) {
@@ -23,15 +24,11 @@ routes.post('/', async (req, res) => {
                 });
             }
 
-            const stripeClient = new StripeClient();
-            let stripeFee = Math.ceil(new Decimal(item.price).mul(0.029).add(30).toNumber());
-            stripeFee = stripeFee < 50 ? 50 : stripeFee;
-            const totalAmount = new Decimal(item.price).add(stripeFee).toNumber();
-
+            const totalAmount = new Decimal(item.price).add(StripeClient.fee(item.price)).toNumber();
             const paymentIntent = await stripeClient.createPaymentIntent(totalAmount, {
                 item_id: item._id.toString(),
                 email: fields.email,
-                stripe_fee: stripeFee,
+                stripe_fee: StripeClient.fee(item.price),
             });
 
             return res.status(200).json({
@@ -40,7 +37,7 @@ routes.post('/', async (req, res) => {
                         id: paymentIntent.id,
                         client_secret: paymentIntent.client_secret,
                         publishable_key: stripeClient.publishableKey,
-                        stripe_fee: stripeFee,
+                        stripe_fee: StripeClient.fee(item.price),
                         total_amount: totalAmount,
                     },
                 },

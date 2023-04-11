@@ -23,7 +23,7 @@ routes.post('/', async (req, res) => {
 
             if (user && !user.confirmed) {
                 return res.status(401).json({
-                    message: 'Not authorized'
+                    message: 'Not confirmed'
                 });
             }
 

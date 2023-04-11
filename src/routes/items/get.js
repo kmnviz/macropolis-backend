@@ -1,6 +1,7 @@
 const express = require('express');
 const routes = express.Router();
 const { ObjectId } = require('mongodb');
+const StripeClient = require('../../clients/stripeClient');
 
 routes.get('/', async (req, res) => {
 
@@ -21,6 +22,10 @@ routes.get('/', async (req, res) => {
                 }
             }
         );
+
+        if (req.query?.withStripeFee) {
+            item.stripe_fee = StripeClient.fee(item.price);
+        }
 
         return res.status(200).json({
             data: { item: item },

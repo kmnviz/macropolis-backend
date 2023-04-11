@@ -43,6 +43,7 @@ routes.post('/', async (req, res) => {
                 bought_by: paymentIntent.metadata.email,
                 bought_for: item.price,
                 created_at: Date.now(),
+                stripe_fee: StripeClient.fee(item.price),
             });
 
             return res.status(200).json({

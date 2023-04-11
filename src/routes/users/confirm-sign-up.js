@@ -1,5 +1,6 @@
 const express = require('express');
 const routes = express.Router();
+const StripeClient = require('../../clients/stripeClient');
 
 routes.post('/', async (req, res) => {
 
@@ -15,6 +16,8 @@ routes.post('/', async (req, res) => {
         }
 
         try {
+            const stripeClient = new StripeClient();
+            const stripeCustomer = await stripeClient.createCustomer(fields.email, fields.username);
             const user = await req.db.collection('users').findOneAndUpdate(
                 {
                     username: fields.username,
@@ -24,6 +27,7 @@ routes.post('/', async (req, res) => {
                     $set: {
                         confirmed: true,
                         updated_at: Date.now(),
+                        stripe_customer_id: stripeCustomer.id,
                     },
                     $unset: {
                         confirmation_hash: '',
@@ -34,15 +38,12 @@ routes.post('/', async (req, res) => {
                 },
             );
 
-            if (user.value) {
-                // await sendMail(user.value.email);
-            }
-
             return res.status(200).json({
                 data: { username: user.value ? fields.username : '' },
                 message: user.value ? `${fields.username} has confirmed registration` : ''
             });
         } catch (error) {
+            console.log('error: ', error);
             return res.status(400).json({
                 message: 'Something went wrong'
             });

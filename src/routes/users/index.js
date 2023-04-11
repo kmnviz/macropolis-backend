@@ -8,6 +8,8 @@ const signInRoute = require('./sign-in');
 const forgotPasswordRoute = require('./forgot-password');
 const changePasswordRoute = require('./change-password');
 const getUsernamesRoute = require('./get-usernames');
+const updateRoute = require('./update');
+const getRoute = require('./get');
 
 routes.use('/check-username-availability', checkUsernameAvailabilityRoute);
 routes.use('/sign-up', signUpRoute);
@@ -16,5 +18,7 @@ routes.use('/sign-in', signInRoute);
 routes.use('/forgot-password', forgotPasswordRoute);
 routes.use('/change-password', changePasswordRoute);
 routes.use('/get-usernames', getUsernamesRoute);
+routes.use('/update', updateRoute);
+routes.use('/get', getRoute);
 
 module.exports = routes;
