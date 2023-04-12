@@ -1,6 +1,7 @@
 const express = require('express');
 const routes = express.Router();
 const StripeClient = require('../../clients/stripeClient');
+const plansEnumerations = require('../../enumerations/plans');
 
 routes.post('/', async (req, res) => {
 
@@ -28,6 +29,7 @@ routes.post('/', async (req, res) => {
                         confirmed: true,
                         updated_at: Date.now(),
                         stripe_customer_id: stripeCustomer.id,
+                        plan: plansEnumerations.FREE,
                     },
                     $unset: {
                         confirmation_hash: '',

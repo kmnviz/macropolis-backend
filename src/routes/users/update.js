@@ -18,12 +18,15 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 const user = await req.db.collection('users').findOneAndUpdate(
                 { _id: new ObjectId(req.user.id) },
                 { $set: { stripe_payment_method_id: fields.stripePaymentMethodId } },
-                { returnDocument: 'after' }
+                { returnDocument: 'before' }
                 );
 
                 const stripeClient = new StripeClient();
-                await stripeClient.attachPaymentMethodToCustomer(user.value.stripe_payment_method_id, user.value.stripe_customer_id);
-                await stripeClient.updateCustomer(user.value.stripe_customer_id, user.value.stripe_payment_method_id);
+                if (user.value?.stripe_payment_method_id) {
+                    await stripeClient.detachPaymentMethodToCustomer(user.value.stripe_payment_method_id);
+                }
+                await stripeClient.attachPaymentMethodToCustomer(fields.stripePaymentMethodId, user.value.stripe_customer_id);
+                await stripeClient.updateCustomer(user.value.stripe_customer_id, fields.stripePaymentMethodId);
             }
 
             return res.status(200).json({

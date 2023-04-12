@@ -4,20 +4,43 @@ const { ObjectId } = require('mongodb');
 const jwtVerifyMiddleware = require('../../middlewares/jwtVerify');
 
 routes.get('/', jwtVerifyMiddleware, async (req, res) => {
-
     try {
-        const user = await req.db.collection('users').findOne({ _id: new ObjectId(req.user.id) }, {
-            projection: {
+        const pipeline = [
+            {
+                $match: {
+                    _id: new ObjectId(req.user.id),
+                }
+            },
+        ];
+
+        if (req.query?.withPlan) {
+            pipeline.push({
+                $lookup: {
+                    from: 'plans',
+                    localField: 'plan',
+                    foreignField: 'name',
+                    as: 'plan'
+                },
+            });
+            pipeline.push({ $unwind: '$plan' });
+        }
+
+        pipeline.push({
+            $project: {
                 password: 0,
                 confirmed: 0,
                 created_at: 0,
                 updated_at: 0,
+                'plan.price_id': 0,
+                'plan.product_id': 0,
             }
         });
 
+        const user = await req.db.collection('users').aggregate(pipeline).toArray();
+
         return res.status(200).json({
             data: {
-                user: user,
+                user: user[0],
             },
             message: `User was fetched`,
         });

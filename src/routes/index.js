@@ -6,13 +6,13 @@ const profilesRoutes = require('./profiles');
 const itemsRoutes = require('./items');
 const stripeRoutes = require('./stripe');
 const salesRoutes = require('./sales');
-const subscriptionsRoutes = require('./subscriptions');
+const plansRoutes = require('./plans');
 
 router.use('/users', usersRoutes);
 router.use('/profiles', profilesRoutes);
 router.use('/items', itemsRoutes);
 router.use('/stripe', stripeRoutes);
 router.use('/sales', salesRoutes);
-router.use('/subscriptions', subscriptionsRoutes);
+router.use('/plans', plansRoutes);
 
 module.exports = router;

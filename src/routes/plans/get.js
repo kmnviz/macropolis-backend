@@ -9,24 +9,24 @@ routes.get('/', async (req, res) => {
     }
 
     try {
-        let subscription = await req.db.collection('subscriptions').findOne({
+        let plan = await req.db.collection('plans').findOne({
             _id: new ObjectId(req.query.id),
         });
 
         const stripeClient = new StripeClient();
-        const productAndPriceExists = await stripeClient.checkIfProductAndPriceExists(subscription.product_id, subscription.price_id);
+        const productAndPriceExists = await stripeClient.checkIfProductAndPriceExists(plan.product_id, plan.price_id);
 
         if (!productAndPriceExists) {
-            subscription = null;
+            plan = null;
         }
 
-        delete subscription.product_id;
-        delete subscription.price_id;
+        delete plan.product_id;
+        delete plan.price_id;
         return res.status(200).json({
             data: {
-                subscription: subscription
+                plan: plan
             },
-            message: `Subscription was fetched`
+            message: `Plan was fetched`
         });
     } catch (error) {
         return res.status(400).json({

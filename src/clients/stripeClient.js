@@ -95,6 +95,10 @@ class StripeClient {
         return await this._client.paymentMethods.attach(paymentMethodId, { customer: customerId });
     }
 
+    async detachPaymentMethodToCustomer(paymentMethodId) {
+        return await this._client.paymentMethods.detach(paymentMethodId);
+    }
+
     async checkIfProductAndPriceExists(productId, priceId) {
         const products = await this.getProducts();
         const prices = await this.getPrices();
