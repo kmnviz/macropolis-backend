@@ -22,7 +22,8 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             const plan = await req.db.collection('plans').findOne({ _id: new ObjectId(fields.planId) });
             const user = await req.db.collection('users').findOne({ _id: new ObjectId(req.user.id) });
 
-            if (!plan) {
+            if (!plan || !user?.stripe_payment_method_id) {
+                console.log('There is not plan or user has no payment method');
                 return res.status(400).json({
                     message: 'Something went wrong'
                 });
@@ -49,6 +50,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             return res.status(200).json({
                 data: {
                     subscription: subscription,
+                    plan: plan,
                 },
                 message: `Subscription was created`
             });
