@@ -43,7 +43,8 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 _id: new ObjectId(req.user.id)
             }, {
                 $set: {
-                    plan: plansEnumerations.ENHANCED,
+                    plan: plan.name,
+                    stripe_subscription_id: subscription.id,
                 }
             });
 
