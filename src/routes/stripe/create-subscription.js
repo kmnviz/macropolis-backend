@@ -3,7 +3,6 @@ const routes = express.Router();
 const StripeClient = require('../../clients/stripeClient');
 const { ObjectId } = require('mongodb');
 const jwtVerifyMiddleware = require('../../middlewares/jwtVerify');
-const plansEnumerations = require('../../enumerations/plans');
 
 routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 

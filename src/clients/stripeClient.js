@@ -99,6 +99,10 @@ class StripeClient {
         return await this._client.paymentMethods.detach(paymentMethodId);
     }
 
+    async cancelSubscription(subscriptionId) {
+        return await this._client.subscriptions.del(subscriptionId);
+    }
+
     async checkIfProductAndPriceExists(productId, priceId) {
         const products = await this.getProducts();
         const prices = await this.getPrices();
