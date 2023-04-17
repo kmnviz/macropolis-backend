@@ -5,6 +5,7 @@ const Decimal = require('decimal.js');
 const {ObjectId} = require('mongodb');
 const withdrawalStatuses = require('../../enumerations/withdrawalStatuses');
 const AnyApiClient = require('../../clients/anyApiClient');
+const validateIban = require('../../helpers/validateIban');
 
 routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
@@ -37,10 +38,14 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 return res.status(422).json({ message: 'Not enough amount' });
             }
 
-            const anyApiClient = new AnyApiClient();
-            const ibanValidationResponse = await anyApiClient.validateIban(fields.iban);
+            // const anyApiClient = new AnyApiClient();
+            // const ibanValidationResponse = await anyApiClient.validateIban(fields.iban);
+            //
+            // if (ibanValidationResponse.data.valid === false) {
+            //     return res.status(422).json({ message: 'Invalid IBAN' });
+            // }
 
-            if (ibanValidationResponse.data.valid === false) {
+            if (!validateIban(fields.iban)) {
                 return res.status(422).json({ message: 'Invalid IBAN' });
             }
 
@@ -48,7 +53,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 user_id: new ObjectId(req.user.id),
                 created_at: Date.now(),
                 amount: availableAmount,
-                status: withdrawalStatuses.PENDING,
+                status: withdrawalStatuses.REQUESTED,
                 metadata: {
                     iban: fields.iban
                 }

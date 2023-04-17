@@ -4,7 +4,7 @@ const routes = express.Router();
 const createRoute = require('./create');
 const updateRoute = require('./update');
 const getRoute = require('./get');
-const getManyRoute = require('./getMany');
+const getManyRoute = require('./get-many');
 const deleteRoute = require('./delete');
 
 routes.use('/create', createRoute);
