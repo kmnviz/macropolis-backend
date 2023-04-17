@@ -54,8 +54,6 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 }
             });
 
-            console.log('withdrawal: ', withdrawal);
-
             return res.status(200).json({
                 data: { withdrawal: {
                     id: withdrawal.insertedId,
@@ -63,7 +61,6 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 message: `Withdrawal was created`
             });
         } catch (error) {
-            console.log('error: ', error);
             return res.status(400).json({
                 message: 'Something went wrong'
             });
