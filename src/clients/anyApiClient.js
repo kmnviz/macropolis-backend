@@ -8,7 +8,7 @@ class AnyApiClient {
     }
 
     async validateIban(iban) {
-        return await axios.get(`${this._url}/iban?iban${iban}&apiKey=${this._apiKey}`);
+        return await axios.get(`${this._url}/iban?iban=${iban}&apiKey=${this._apiKey}`);
     }
 }
 

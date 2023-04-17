@@ -20,13 +20,6 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
         }
 
         try {
-            const anyApiClient = new AnyApiClient();
-            const ibanValidationResponse = await anyApiClient.validateIban(fields.iban);
-
-            if (ibanValidationResponse.data.valid === false) {
-                return res.status(422).json({ message: 'Invalid IBAN' });
-            }
-
             const lastWithdrawal = await req.db.collection('withdrawals').findOne({}, {
                 sort: { created_at: -1 }
             });
@@ -44,16 +37,29 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 return res.status(422).json({ message: 'Not enough amount' });
             }
 
+            const anyApiClient = new AnyApiClient();
+            const ibanValidationResponse = await anyApiClient.validateIban(fields.iban);
+
+            if (ibanValidationResponse.data.valid === false) {
+                return res.status(422).json({ message: 'Invalid IBAN' });
+            }
+
             const withdrawal = await req.db.collection('withdrawals').insertOne({
                 user_id: new ObjectId(req.user.id),
                 created_at: Date.now(),
                 amount: availableAmount,
                 status: withdrawalStatuses.PENDING,
-                metadata: {}
+                metadata: {
+                    iban: fields.iban
+                }
             });
 
+            console.log('withdrawal: ', withdrawal);
+
             return res.status(200).json({
-                data: { withdrawal: withdrawal },
+                data: { withdrawal: {
+                    id: withdrawal.insertedId,
+                } },
                 message: `Withdrawal was created`
             });
         } catch (error) {
