@@ -3,14 +3,15 @@ const path = require('path');
 const crypto = require('crypto');
 const GoogleCloudStorageClient = require('../clients/googleCloudStorageClient');
 
-class AudioManager {
+class ArchiveManager {
 
-    validateAudio(file, size) {
-        const allowedExtensions = ['.wav', '.flac', '.aiff'];
+    validateArchive(file, size) {
+        const allowedExtensions = ['.zip', '.rar'];
+        const allowedMimetypes = ['application/zip', 'application/x-rar-compressed'];
         const extension = path.extname(file.originalFilename);
         const mimetype = file.mimetype;
 
-        if (!allowedExtensions.includes(extension) || !mimetype.startsWith('audio/')) {
+        if (!allowedExtensions.includes(extension) || !allowedMimetypes.includes(mimetype)) {
             return false;
         }
 
@@ -23,7 +24,7 @@ class AudioManager {
         const newFilename = crypto.randomBytes(28).toString('hex');
         const fileExtension = file.originalFilename.split('.').pop();
         const filename = `${newFilename}.${fileExtension}`;
-        const bucketFile = googleCloudStorageClient.audioBucket.file(filename);
+        const bucketFile = googleCloudStorageClient.archiveBucket.file(filename);
         const stream = fs.createReadStream(file.filepath);
 
         const uploadPromise = new Promise((resolve, reject) => {
@@ -49,4 +50,4 @@ class AudioManager {
     }
 }
 
-module.exports = AudioManager;
+module.exports = ArchiveManager;

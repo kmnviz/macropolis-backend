@@ -1,6 +1,9 @@
 const imageSize = require('image-size');
 const sharp = require('sharp');
 const path = require('path');
+const GoogleCloudStorageClient = require('../clients/googleCloudStorageClient');
+const fs = require("fs");
+const crypto = require("crypto");
 
 class ImageManager {
 
@@ -31,6 +34,35 @@ class ImageManager {
         if (file.size > size) return false;
 
         return true;
+    }
+
+    async storeToBucket(file) {
+        const googleCloudStorageClient = new GoogleCloudStorageClient();
+
+        const imageBuffer = fs.readFileSync(file.filepath);
+        const resizedImageResponse = await this.resizeImage(imageBuffer);
+        const newImageFilename = crypto.randomBytes(28).toString('hex');
+        const imageFileExtension = file.originalFilename.split('.').pop();
+
+        const uploadImagePromises = Object.keys(resizedImageResponse.outputs)
+            .map((key) => {
+                const filename = `${key}_${newImageFilename}.${imageFileExtension}`;
+                const file = googleCloudStorageClient.imagesBucket.file(filename);
+                const stream = file.createWriteStream({ resumable: false });
+                return new Promise((resolve, reject) => {
+                    stream.on('error', (error) => { reject(error); });
+                    stream.on('finish', () => { resolve() });
+                    stream.end(resizedImageResponse.outputs[key]);
+                });
+            });
+
+        try {
+            await Promise.all([...uploadImagePromises]);
+
+            return `${newImageFilename}.${imageFileExtension}`;
+        } catch (error) {
+            throw new error;
+        }
     }
 }
 

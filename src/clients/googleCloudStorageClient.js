@@ -1,3 +1,5 @@
+const fs = require('fs');
+const crypto = require('crypto');
 const { Storage } = require('@google-cloud/storage');
 
 class GoogleCloudStorageClient {
@@ -51,8 +53,19 @@ class GoogleCloudStorageClient {
         return `https://storage.googleapis.com/${process.env.GCP_STORAGE_AUDIO_PREVIEW_BUCKET}`;
     }
 
-    async generateAudioSignedUrl(name, extension) {
+    get archiveBucket() {
+        return this._client.bucket(process.env.GCP_STORAGE_ARCHIVE_BUCKET);
+    }
 
+    get archiveBucketName() {
+        return process.env.GCP_STORAGE_ARCHIVE_BUCKET;
+    }
+
+    get archiveBucketPath() {
+        return `https://storage.googleapis.com/${process.env.GCP_STORAGE_ARCHIVE_BUCKET}`;
+    }
+
+    async generateAudioSignedUrl(name, extension) {
         const options = {
             version: 'v4',
             action: 'read',

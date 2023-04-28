@@ -18,7 +18,7 @@ class MailManager {
         const mailOptions = {
             from: 'hello@lisenmi.com',
             to: email,
-            subject: 'Please confirm your registration on d.space',
+            subject: `Please confirm your registration on ${process.env.APP_NAME}`,
             html: `<p>Confirm your email visiting <a href="${process.env.FRONTEND_URL}/sign-in?username=${username}&confirmationHash=${confirmationHash}">this link</a>.</p>`,
         };
 
@@ -37,7 +37,7 @@ class MailManager {
         const mailOptions = {
             from: 'hello@lisenmi.com',
             to: email,
-            subject: 'Restore password link for d.space',
+            subject: `Restore password link for ${process.env.APP_NAME}`,
             html: `
             <p>Your have requested restore password link. Visit <a href="${process.env.FRONTEND_URL}/forgot-password?restorePasswordHash=${restorePasswordHash}">link</a> to set new password.</p>
         `,
@@ -58,7 +58,7 @@ class MailManager {
         const mailOptions = {
             from: 'hello@lisenmi.com',
             to: email,
-            subject: 'You have just bought a product from d.space',
+            subject: `You have just bought a product from ${process.env.APP_NAME}`,
             html: `<p>Download file from <a href="${process.env.FRONTEND_URL}/download?downloadUrl=${encodeURIComponent(signedUrl)}&fileExtension=${fileExtension}&itemId=${itemId}&username=${username}">this link</a>. The link will be available 7 days</p>`,
         };
 

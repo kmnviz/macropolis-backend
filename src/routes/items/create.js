@@ -1,12 +1,12 @@
 const fs = require('fs');
-const crypto = require('crypto');
 const express = require('express');
+const Decimal = require('decimal.js');
 const routes = express.Router();
 const jwtVerifyMiddleware = require('../../middlewares/jwtVerify');
 const ImageManager = require('../../services/imageManager');
 const AudioManager = require('../../services/audioManager');
-const GoogleCloudStorageClient = require('../../clients/googleCloudStorageClient');
-const Decimal = require('decimal.js');
+const ArchiveManager = require('../../services/archiveManager');
+const itemTypesEnumerations = require('../../enumerations/itemTypes');
 
 routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
@@ -17,7 +17,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             });
         }
 
-        if (!fields?.name || !fields?.price || !files?.image || !files.audio) {
+        if (!fields?.name || !fields?.price || !fields?.type || !files?.image || !files?.item || !files.item) {
             return res.status(422).json({ message: 'Missing parameter' });
         }
 
@@ -25,74 +25,48 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             return res.status(422).json({ message: 'Wrong parameter' });
         }
 
+        if (!Object.values(itemTypesEnumerations).includes(fields.type)) {
+            return res.status(422).json({ message: 'Wrong type' });
+        }
+
         const record = {};
 
         const imageManager = new ImageManager();
-        const audioManager = new AudioManager();
 
         if (!imageManager.validateImage(files.image, 10240 * 10240)) {
             fs.unlinkSync(files.image.filepath);
             return res.status(422).json({ message: 'Wrong parameter' });
         }
 
-        if (!audioManager.validateAudio(files.audio, 200 * 1024 * 1024)) {
-            fs.unlinkSync(files.audio.filepath);
-            return res.status(422).json({ message: 'Wrong parameter' });
-        }
-
-        const imageBuffer = fs.readFileSync(files.image.filepath);
-        const resizedImageResponse = await imageManager.resizeImage(imageBuffer);
-        const newImageFilename = crypto.randomBytes(28).toString('hex');
-        const imageFileExtension = files.image.originalFilename.split('.').pop();
-
-        const googleCloudStorageClient = new GoogleCloudStorageClient();
-        const uploadImagePromises = Object.keys(resizedImageResponse.outputs)
-            .map((key) => {
-                const filename = `${key}_${newImageFilename}.${imageFileExtension}`;
-                const file = googleCloudStorageClient.imagesBucket.file(filename);
-                const stream = file.createWriteStream({ resumable: false });
-                return new Promise((resolve, reject) => {
-                    stream.on('error', (error) => { reject(error); });
-                    stream.on('finish', () => { resolve() });
-                    stream.end(resizedImageResponse.outputs[key]);
-                });
-            });
-
-        const newAudioFilename = crypto.randomBytes(28).toString('hex');
-        const audioFileExtension = files.audio.originalFilename.split('.').pop();
-        const audioFilename = `${newAudioFilename}.${audioFileExtension}`;
-        const audioFile = googleCloudStorageClient.audioBucket.file(audioFilename);
-        const audioStream = fs.createReadStream(files.audio.filepath);
-        const uploadAudioPromise = new Promise((resolve, reject) => {
-            let uploadedBytes = 0;
-            audioStream.on('data', (chunk) => {
-                uploadedBytes += chunk.length;
-                const progress = Math.round((uploadedBytes / fs.statSync(files.audio.filepath).size) * 100);
-                // TODO: handle upload progress further
-                // console.log(`Progress: ${progress}%`);
-            });
-            audioStream.pipe(audioFile.createWriteStream())
-                .on('error', () => { reject() })
-                .on('finish', () => { resolve() });
-        });
-
         try {
-            await Promise.all([...uploadImagePromises, uploadAudioPromise]);
-            record.image = `${newImageFilename}.${imageFileExtension}`;
-            record.audio = `${newAudioFilename}.${audioFileExtension}`;
-        } catch (error) {
-            return res.status(400).json({
-                message: 'Something terribly went wrong'
-            });
-        }
+            if (fields.type === itemTypesEnumerations.AUDIO) {
+                const audioManager = new AudioManager();
 
-        record.user_id = req.user.id;
-        record.username = req.user.username;
-        if (fields?.name) record.name = fields.name;
-        if (fields?.price) record.price = Decimal(fields.price).mul(100).toString();
-        record.created_at = Date.now();
+                if (!audioManager.validateAudio(files.item, 200 * 1024 * 1024)) {
+                    fs.unlinkSync(files.item.filepath);
+                    return res.status(422).json({ message: 'Wrong parameter' });
+                }
 
-        try {
+                record.audio = await audioManager.storeToBucket(files.item);
+            } else if (fields.type === itemTypesEnumerations.ARCHIVE) {
+                const archiveManager = new ArchiveManager();
+
+                if (!archiveManager.validateArchive(files.item, 200 * 1024 * 1024)) {
+                    fs.unlinkSync(files.item.filepath);
+                    return res.status(422).json({ message: 'Wrong parameter' });
+                }
+
+                record.archive = await archiveManager.storeToBucket(files.item);
+            }
+
+            record.image = await imageManager.storeToBucket(files.image);
+            record.user_id = req.user.id;
+            record.username = req.user.username;
+            if (fields?.name) record.name = fields.name;
+            if (fields?.price) record.price = Decimal(fields.price).mul(100).toString();
+            if (fields?.type) record.type = fields.type;
+            record.created_at = Date.now();
+
             await req.db.collection('items').insertOne(record);
 
             return res.status(200).json({
@@ -100,6 +74,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 message: `Item was created`
             });
         } catch (error) {
+            console.log('error: ', error);
             return res.status(400).json({
                 message: 'Something went wrong'
             });
