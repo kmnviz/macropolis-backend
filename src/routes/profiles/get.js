@@ -18,6 +18,7 @@ routes.get('/', async (req, res) => {
                     username: 1,
                     name: 1,
                     avatar: 1,
+                    background: 1,
                 }
             }
         );
