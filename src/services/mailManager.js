@@ -16,7 +16,7 @@ class MailManager {
 
     async sendSignUpConfirmationRequest(email, username, confirmationHash) {
         const mailOptions = {
-            from: 'hello@lisenmi.com',
+            from: process.env.MAIL_USERNAME,
             to: email,
             subject: `Please confirm your registration on ${process.env.APP_NAME}`,
             html: `<p>Confirm your email visiting <a href="${process.env.FRONTEND_URL}/sign-in?username=${username}&confirmationHash=${confirmationHash}">this link</a>.</p>`,
@@ -35,7 +35,7 @@ class MailManager {
 
     async sendRestorePasswordLinkRequest(email, restorePasswordHash) {
         const mailOptions = {
-            from: 'hello@lisenmi.com',
+            from: process.env.MAIL_USERNAME,
             to: email,
             subject: `Restore password link for ${process.env.APP_NAME}`,
             html: `
@@ -56,7 +56,7 @@ class MailManager {
 
     async sendDownloadLink(email, signedUrl, fileExtension, itemId, username) {
         const mailOptions = {
-            from: 'hello@lisenmi.com',
+            from: process.env.MAIL_USERNAME,
             to: email,
             subject: `You have just bought a product from ${process.env.APP_NAME}`,
             html: `<p>Download file from <a href="${process.env.FRONTEND_URL}/download?downloadUrl=${encodeURIComponent(signedUrl)}&fileExtension=${fileExtension}&itemId=${itemId}&username=${username}">this link</a>. The link will be available 7 days</p>`,
@@ -75,10 +75,10 @@ class MailManager {
 
     async sendPurchasedItemMessage(email, itemName, itemPrice) {
         const mailOptions = {
-            from: 'hello@lisenmi.com',
+            from: process.env.MAIL_USERNAME,
             to: email,
             subject: `Your item ${itemName} has been purchased`,
-            html: `<p>${itemName} was purchased on lisenmi.com. You have earned ${itemPrice}</p>`,
+            html: `<p>${itemName} was purchased on ${process.env.APP_NAME}. You have earned ${itemPrice}</p>`,
         };
 
         await this._client.sendMail(mailOptions, (error, info) => {
