@@ -62,9 +62,10 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             record.image = await imageManager.storeToBucket(files.image);
             record.user_id = req.user.id;
             record.username = req.user.username;
+            record.type = fields.type;
             if (fields?.name) record.name = fields.name;
             if (fields?.price) record.price = Decimal(fields.price).mul(100).toString();
-            if (fields?.type) record.type = fields.type;
+            if (fields?.description) record.description = fields.description;
             record.created_at = Date.now();
 
             await req.db.collection('items').insertOne(record);
