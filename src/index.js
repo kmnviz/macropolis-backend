@@ -19,6 +19,7 @@ const corsOptions = (req, callback) => {
         'https://dashboard.stripe.com'
     ];
     const origin = req.header('Origin');
+    console.log('origin: ', origin);
 
     if (allowedOrigins.indexOf(origin) !== -1) {
         const corsOptions = {
