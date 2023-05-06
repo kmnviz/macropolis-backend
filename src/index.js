@@ -11,7 +11,7 @@ const app = express();
 app.use(cookieParser());
 
 // app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-app.use(cors((req, callback) => {
+const corsOptions = (req, callback) => {
     const allowedOrigins = [process.env.FRONTEND_URL,
         'https://api.stripe.com',
         'https://events.stripe.com',
@@ -29,7 +29,9 @@ app.use(cors((req, callback) => {
     } else {
         callback(new Error('Not allowed by CORS'));
     }
-}));
+}
+
+app.use(cors(corsOptions));
 
 const httpServer = http.createServer(app);
 const httpPort = process.env.HTTP_PORT;
