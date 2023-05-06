@@ -13,7 +13,7 @@ function jwtVerify(req, res, next) {
                 message: 'Not allowed.'
             });
 
-        req.user = user
+        req.user = user;
         next();
     });
 }

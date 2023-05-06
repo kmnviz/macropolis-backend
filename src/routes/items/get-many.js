@@ -8,17 +8,23 @@ routes.get('/', async (req, res) => {
     }
 
     try {
+        const options = {
+            projection: {
+                created_at: 0,
+                audio: 0,
+                user_id: 0,
+            },
+        };
+
+        if (req.query?.limit) {
+            options.limit = parseInt(req.query.limit);
+        }
+
         const items = await req.db.collection('items').find(
             {
                 username: req.query.username,
             },
-            {
-                projection: {
-                    created_at: 0,
-                    audio: 0,
-                    user_id: 0,
-                }
-            }
+            options
         ).toArray();
 
         return res.status(200).json({

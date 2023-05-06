@@ -4,7 +4,7 @@ const express = require('express');
 const routes = express.Router();
 const MailManager = require('../../services/mailManager');
 
-const reservedUsernames = ['sign-in', 'sign-up', 'forgot-password', 'checkout', 'dashboard', 'download'];
+const reservedUsernames = ['sign-in', 'sign-up', 'forgot-password', 'checkout', 'dashboard', 'download', '404'];
 
 routes.post('/', async (req, res) => {
 

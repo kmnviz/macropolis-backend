@@ -9,6 +9,10 @@ routes.get('/', async (req, res) => {
         return res.status(422).json({ message: 'Missing parameter' });
     }
 
+    if (!ObjectId.isValid(req.query.id)) {
+        return res.status(422).json({ message: 'Wrong parameter' });
+    }
+
     try {
         const item = await req.db.collection('items').findOne(
             {
