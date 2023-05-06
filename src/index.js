@@ -20,6 +20,8 @@ const corsOptions = (req, callback) => {
     ];
     const origin = req.headers['origin'];
     console.log('req: ', req.headers);
+    console.log('req: ', req.headers.origin);
+    console.log('req: ', req.headers.referer);
 
     if (allowedOrigins.indexOf(origin) !== -1) {
         const corsOptions = {
