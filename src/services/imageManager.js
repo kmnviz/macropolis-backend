@@ -30,8 +30,11 @@ class ImageManager {
         const extension = path.extname(file.originalFilename);
         const mimetype = file.mimetype;
 
-        if (!allowedExtensions.test(extension) || !mimetype.startsWith('image/')) return false;
-        return file.size > size;
+        if (!allowedExtensions.test(extension) || !mimetype.startsWith('image/')) {
+            return false;
+        }
+
+        return file.size <= size;
     }
 
     async storeToBucket(file) {
