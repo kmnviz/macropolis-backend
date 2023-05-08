@@ -11,11 +11,23 @@ const app = express();
 app.use(cookieParser());
 const corsOptionsDelegate = function (req, callback) {
     let corsOptions;
-    if ([process.env.FRONTEND_URL].indexOf(req.header('Origin')) !== -1) {
-        corsOptions = { origin: true, credentials: true };
+    const allowList = [
+        process.env.FRONTEND_URL,
+        'https://api.stripe.com',
+        'https://events.stripe.com',
+        'https://hooks.stripe.com',
+        'https://dashboard.stripe.com'
+    ]
+    if ([allowList].includes(req.header('Origin'))) {
+        if (req.header('Origin') === process.env.FRONTEND_URL) {
+            corsOptions = { origin: true, credentials: true };
+        } else {
+            corsOptions = { origin: true };
+        }
     } else {
-        corsOptions = { origin: false };
+        callback(new Error('Not allowed by CORS'));
     }
+
     callback(null, corsOptions);
 }
 app.use(cors(corsOptionsDelegate));
