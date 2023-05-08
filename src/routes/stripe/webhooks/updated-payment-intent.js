@@ -7,7 +7,6 @@ const GoogleCloudStorageClient = require('../../../clients/googleCloudStorageCli
 const MailManager = require('../../../services/mailManager');
 
 routes.post('/', async (req, res) => {
-    console.log('enters here [1]');
     const signature = req.headers['stripe-signature'];
 
     let event;
