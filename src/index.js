@@ -9,6 +9,36 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(cookieParser());
+// app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        console.log('origin: ', origin);
+        callback(null, true);
+    }
+}
+app.use(cors(corsOptions));
+
+// const corsOptionsDelegate = function (req, callback) {
+//     let corsOptions;
+//     const allowList = [
+//         process.env.FRONTEND_URL,
+//         'https://api.stripe.com',
+//         'https://events.stripe.com',
+//         'https://hooks.stripe.com',
+//         'https://dashboard.stripe.com'
+//     ]
+//     if ([process.env.FRONTEND_URL].indexOf(req.header('Origin')) !== -1) {
+//         corsOptions = { origin: true, credentials: true };
+//     } else {
+//         corsOptions = { origin: false };
+//     }
+//
+//     console.log('origin', req.header('Origin'));
+//     console.log('corsOptions', corsOptions);
+//     callback(null, corsOptions);
+// }
+// app.use(cors(corsOptionsDelegate));
 
 const httpServer = http.createServer(app);
 const httpPort = process.env.HTTP_PORT;
@@ -49,27 +79,6 @@ const GoogleCloudPubSubClient = require('./clients/googleCloudPubSubClient');
 
     const googleCloudPubSubClient = new GoogleCloudPubSubClient();
     await googleCloudPubSubClient.subscribeToAudioConversionFinishedEvent(dbClient.db(process.env.DB_NAME).collection('items'));
-
-    const corsOptionsDelegate = function (req, callback) {
-        let corsOptions;
-        const allowList = [
-            process.env.FRONTEND_URL,
-            'https://api.stripe.com',
-            'https://events.stripe.com',
-            'https://hooks.stripe.com',
-            'https://dashboard.stripe.com'
-        ]
-        if ([process.env.FRONTEND_URL].indexOf(req.header('Origin')) !== -1) {
-            corsOptions = { origin: true, credentials: true };
-        } else {
-            corsOptions = { origin: false };
-        }
-
-        console.log('origin', req.header('Origin'));
-        console.log('corsOptions', corsOptions);
-        callback(null, corsOptions);
-    }
-    app.use(cors(corsOptionsDelegate));
 
     httpServer.listen(httpPort, async () => {
         console.log(`App listening at port ${httpPort}`);
