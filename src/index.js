@@ -11,34 +11,28 @@ const app = express();
 app.use(cookieParser());
 // app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
-const corsOptions = {
-    origin: function (origin, callback) {
-        console.log('origin: ', origin);
-        callback(null, true);
+const corsOptionsDelegate = function (req, callback) {
+    let corsOptions;
+    const allowList = [
+        'https://api.stripe.com',
+        'https://events.stripe.com',
+        'https://hooks.stripe.com',
+        'https://dashboard.stripe.com'
+    ]
+    if (typeof req.header('Origin') === 'undefined') {
+        corsOptions = { origin: true, credentials: true };
+    } else if (allowList.indexOf(req.header('Origin')) !== -1) {
+        corsOptions = { origin: true };
+    } else {
+        callback(new Error('Not allowed by CORS'));
     }
-}
-app.use(cors(corsOptions));
 
-// const corsOptionsDelegate = function (req, callback) {
-//     let corsOptions;
-//     const allowList = [
-//         process.env.FRONTEND_URL,
-//         'https://api.stripe.com',
-//         'https://events.stripe.com',
-//         'https://hooks.stripe.com',
-//         'https://dashboard.stripe.com'
-//     ]
-//     if ([process.env.FRONTEND_URL].indexOf(req.header('Origin')) !== -1) {
-//         corsOptions = { origin: true, credentials: true };
-//     } else {
-//         corsOptions = { origin: false };
-//     }
-//
-//     console.log('origin', req.header('Origin'));
-//     console.log('corsOptions', corsOptions);
-//     callback(null, corsOptions);
-// }
-// app.use(cors(corsOptionsDelegate));
+    console.log('origin', req.header('Origin'));
+    console.log('corsOptions', corsOptions);
+
+    callback(null, corsOptions);
+}
+app.use(cors(corsOptionsDelegate));
 
 const httpServer = http.createServer(app);
 const httpPort = process.env.HTTP_PORT;
