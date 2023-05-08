@@ -19,7 +19,7 @@ const corsOptionsDelegate = function (req, callback) {
         'https://hooks.stripe.com',
         'https://dashboard.stripe.com'
     ]
-    if (typeof req.header('Origin') === 'undefined') {
+    if (typeof req.header('Origin') === 'undefined' || req.header('Origin') === process.env.FRONTEND_URL) {
         corsOptions = { origin: true, credentials: true };
     } else if (allowList.indexOf(req.header('Origin')) !== -1) {
         corsOptions = { origin: true };
