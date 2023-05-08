@@ -18,20 +18,13 @@ const corsOptionsDelegate = function (req, callback) {
         'https://hooks.stripe.com',
         'https://dashboard.stripe.com'
     ]
-    if ([allowList].indexOf(req.header('Origin')) !== -1) {
-        if (req.header('Origin') === process.env.FRONTEND_URL) {
-            corsOptions = { origin: true, credentials: true };
-        } else {
-            corsOptions = { origin: true };
-        }
+    if ([process.env.FRONTEND_URL].indexOf(req.header('Origin')) !== -1) {
+        corsOptions = { origin: true, credentials: true };
     } else {
-        callback(new Error('Not allowed by CORS'));
+        corsOptions = { origin: false };
     }
 
-    console.log('corsOptions: ', corsOptions);
-    console.log('origin: ', req.header('Origin'));
-
-    corsOptions = { origin: true, credentials: true };
+    console.log('corsOptions', corsOptions);
     callback(null, corsOptions);
 }
 app.use(cors(corsOptionsDelegate));
