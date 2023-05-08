@@ -9,30 +9,7 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(cookieParser());
-// app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-
-const corsOptionsDelegate = function (req, callback) {
-    let corsOptions;
-    const allowList = [
-        'https://api.stripe.com',
-        'https://events.stripe.com',
-        'https://hooks.stripe.com',
-        'https://dashboard.stripe.com'
-    ]
-    if (typeof req.header('Origin') === 'undefined' || req.header('Origin') === process.env.FRONTEND_URL) {
-        corsOptions = { origin: true, credentials: true };
-    } else if (allowList.indexOf(req.header('Origin')) !== -1) {
-        corsOptions = { origin: true };
-    } else {
-        callback(new Error('Not allowed by CORS'));
-    }
-
-    console.log('origin', req.header('Origin'));
-    console.log('corsOptions', corsOptions);
-
-    callback(null, corsOptions);
-}
-app.use(cors(corsOptionsDelegate));
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 const httpServer = http.createServer(app);
 const httpPort = process.env.HTTP_PORT;
