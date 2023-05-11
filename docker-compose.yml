@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: lisenmi-backend
+    container_name: macropolis-backend
     volumes:
       - .:/app
       - /app/node_modules
@@ -14,7 +14,7 @@ services:
 #      - mongodb
 #  mongodb:
 #    image: 'mongo'
-#    container_name: lisenmi-mongo
+#    container_name: macropolis-mongo
 #    ports:
 #      - 27018:27017
 #    volumes:
