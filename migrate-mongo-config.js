@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const config = {
     mongodb: {
-        url: `mongodb://localhost:${process.env.DB_PORT}`,
+        url: `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}`,
         databaseName: process.env.DB_NAME,
         options: {
             useNewUrlParser: true,
