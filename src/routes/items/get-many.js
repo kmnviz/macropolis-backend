@@ -3,11 +3,8 @@ const routes = express.Router();
 
 routes.get('/', async (req, res) => {
 
-    if (!req.query?.username) {
-        return res.status(422).json({ message: 'Missing parameter' });
-    }
-
     try {
+        const filter = {};
         const options = {
             projection: {
                 created_at: 0,
@@ -16,16 +13,19 @@ routes.get('/', async (req, res) => {
             },
         };
 
+        if (req.query?.username) {
+            filter.username = req.query.username;
+        }
+
         if (req.query?.limit) {
             options.limit = parseInt(req.query.limit);
         }
 
-        const items = await req.db.collection('items').find(
-            {
-                username: req.query.username,
-            },
-            options
-        ).toArray();
+        if (req.query?.sort) {
+            options.sort = { _id: req.query.sort === 'desc' ? -1 : 1 };
+        }
+
+        const items = await req.db.collection('items').find(filter, options).toArray();
 
         return res.status(200).json({
             data: { items: items },
