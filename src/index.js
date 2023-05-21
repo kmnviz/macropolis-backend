@@ -22,12 +22,12 @@ const GoogleCloudPubSubClient = require('./clients/googleCloudPubSubClient');
         process.exit(1);
     }
 
-    if (!process.env.DB_HOST || !process.env.DB_PORT || !process.env.DB_NAME) {
-        console.log('database properties not set.')
+    if (!process.env.DB_CONNECTION_STRING) {
+        console.log('Database connection config not set.')
         process.exit(1);
     }
 
-    const dbClient = new MongoClient(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, {
+    const dbClient = new MongoClient(process.env.DB_CONNECTION_STRING, {
         useNewUrlParser: true,
         useUnifiedTopology: true
     });
