@@ -5,6 +5,7 @@ const {buffer} = require('micro');
 const StripeClient = require('../../../clients/stripeClient');
 const GoogleCloudStorageClient = require('../../../clients/googleCloudStorageClient');
 const MailManager = require('../../../services/mailManager');
+const itemTypesEnumerations = require('../../../enumerations/itemTypes');
 
 routes.post('/', async (req, res) => {
     const signature = req.headers['stripe-signature'];
@@ -29,10 +30,10 @@ routes.post('/', async (req, res) => {
             }
 
             const googleCloudStorageClient = new GoogleCloudStorageClient();
-            const filename = item.audio.split('.').shift();
-            const fileExtension = item.audio.split('.').pop();
+            const filename = item[itemTypesEnumerations[item.type.toUpperCase()]].split('.').shift();
+            const fileExtension = item[itemTypesEnumerations[item.type.toUpperCase()]].split('.').pop();
 
-            const signedUrl = await googleCloudStorageClient.generateAudioSignedUrl(filename, fileExtension);
+            const signedUrl = await googleCloudStorageClient.generateSignedUrl(filename, item.type, fileExtension);
             const mailManager = new MailManager();
             await mailManager.sendDownloadLink(paymentIntent.metadata.email, signedUrl, fileExtension, paymentIntent.metadata.item_id, user.username);
             await mailManager.sendPurchasedItemMessage(user.email, item.name, item.price);

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const crypto = require('crypto');
 const { Storage } = require('@google-cloud/storage');
+const itemTypesEnumerations = require('../enumerations/itemTypes');
 
 class GoogleCloudStorageClient {
 
@@ -65,7 +66,7 @@ class GoogleCloudStorageClient {
         return `https://storage.googleapis.com/${process.env.GCP_STORAGE_ARCHIVE_BUCKET}`;
     }
 
-    async generateAudioSignedUrl(name, extension) {
+    async generateSignedUrl(name, itemType, extension) {
         const options = {
             version: 'v4',
             action: 'read',
@@ -74,9 +75,16 @@ class GoogleCloudStorageClient {
             promptSaveAs: `${name}.${extension}`
         };
 
-        const [url] = await this.audioBucket
-            .file(`${name}.${extension}`)
-            .getSignedUrl(options);
+        let bucket;
+        if (itemType === itemTypesEnumerations.AUDIO) {
+            bucket = this.audioBucket;
+        } else if (itemType === itemTypesEnumerations.ARCHIVE) {
+            bucket = this.archiveBucket;
+        } else {
+            throw new Error('Unknown file type');
+        }
+
+        const [url] = await bucket.file(`${name}.${extension}`).getSignedUrl(options);
 
         return url;
     }
