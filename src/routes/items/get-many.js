@@ -17,6 +17,10 @@ routes.get('/', async (req, res) => {
             filter.username = req.query.username;
         }
 
+        if (req.query?.type) {
+            filter.type = req.query.type;
+        }
+
         if (req.query?.limit) {
             options.limit = parseInt(req.query.limit);
         }
