@@ -13,10 +13,14 @@ const up = async (db, client) => {
                     limit: 999999999,
                     description: 'unlimited'
                 },
-                space: {
+                collections: {
+                    limit: 1,
+                    description: 'create collections of items'
+                },
+                storage: {
                     limit: 10240,
-                    description: 'up to 10GB disk space'
-                }
+                    description: 'up to 10GB storage'
+                },
             }
         },
         {
@@ -28,10 +32,14 @@ const up = async (db, client) => {
                     limit: 10,
                     description: 'up to 10 items'
                 },
-                space: {
+                collections: {
+                    limit: 0,
+                    description: 'collections not available'
+                },
+                storage: {
                     limit: 10240,
-                    description: 'up to 1GB disk space'
-                }
+                    description: 'up to 1GB storage'
+                },
             }
         }
     ]);
