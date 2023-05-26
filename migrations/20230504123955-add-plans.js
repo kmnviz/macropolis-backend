@@ -11,15 +11,15 @@ const up = async (db, client) => {
             includes: {
                 items: {
                     limit: 999999999,
-                    description: 'unlimited'
+                    description: 'number of items: unlimited'
                 },
                 collections: {
                     limit: 1,
-                    description: 'create collections of items'
+                    description: 'collections: yes'
                 },
                 storage: {
                     limit: 10240,
-                    description: 'up to 10GB storage'
+                    description: 'storage: 10GB'
                 },
             }
         },
@@ -30,15 +30,15 @@ const up = async (db, client) => {
             includes: {
                 items: {
                     limit: 10,
-                    description: 'up to 10 items'
+                    description: 'number of items: 10'
                 },
                 collections: {
                     limit: 0,
-                    description: 'collections not available'
+                    description: 'collections: no'
                 },
                 storage: {
                     limit: 10240,
-                    description: 'up to 1GB storage'
+                    description: 'storage: 1GB'
                 },
             }
         }
