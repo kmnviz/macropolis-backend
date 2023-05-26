@@ -38,13 +38,6 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 return res.status(422).json({ message: 'Not enough amount' });
             }
 
-            // const anyApiClient = new AnyApiClient();
-            // const ibanValidationResponse = await anyApiClient.validateIban(fields.iban);
-            //
-            // if (ibanValidationResponse.data.valid === false) {
-            //     return res.status(422).json({ message: 'Invalid IBAN' });
-            // }
-
             if (!validateIban(fields.iban)) {
                 return res.status(422).json({ message: 'Invalid IBAN' });
             }

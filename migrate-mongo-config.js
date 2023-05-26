@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const config = {
     mongodb: {
-        url: DB_CONNECTION_STRING,
+        url: process.env.DB_CONNECTION_STRING,
         databaseName: process.env.DB_NAME,
         options: {
             useNewUrlParser: true,

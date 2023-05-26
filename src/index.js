@@ -39,7 +39,7 @@ const GoogleCloudPubSubClient = require('./clients/googleCloudPubSubClient');
     app.use((req, res, next) => {
         req.dbClient = dbClient;
         req.db = dbClient.db(process.env.DB_NAME);
-        req.formidable = formidable();
+        req.formidable = formidable({multiples: true});
         next();
     });
     app.use('/', routes);

@@ -1,7 +1,6 @@
 const express = require('express');
 const routes = express.Router();
 const { ObjectId } = require('mongodb');
-const StripeClient = require('../../clients/stripeClient');
 
 routes.get('/', async (req, res) => {
 
@@ -14,26 +13,21 @@ routes.get('/', async (req, res) => {
     }
 
     try {
-        const item = await req.db.collection('items').findOne(
+        const collection = await req.db.collection('collections').findOne(
             {
                 _id: new ObjectId(req.query.id)
             },
             {
                 projection: {
                     created_at: 0,
-                    audio: 0,
                     user_id: 0,
                 }
             }
         );
 
-        if (req.query?.withStripeFee) {
-            item.stripe_fee = StripeClient.fee(item.price);
-        }
-
         return res.status(200).json({
-            data: { item: item },
-            message: 'Item was fetched'
+            data: { collection: collection },
+            message: 'Collection were fetched'
         });
     } catch (error) {
         console.log('error', error);
