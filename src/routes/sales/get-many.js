@@ -21,12 +21,18 @@ routes.get('/', jwtVerifyMiddleware, async (req, res) => {
                 }
             },
             {
-                $unwind: '$item'
+                $lookup: {
+                    from: 'collections',
+                    localField: 'collection_id',
+                    foreignField: '_id',
+                    as: 'collection'
+                }
             },
             {
                 $project: {
                     _id: 0,
                     'item._id': 0,
+                    'collection._id': 0,
                 }
             }
         ]).toArray();

@@ -5,7 +5,6 @@ const {buffer} = require('micro');
 const StripeClient = require('../../../clients/stripeClient');
 const GoogleCloudStorageClient = require('../../../clients/googleCloudStorageClient');
 const MailManager = require('../../../services/mailManager');
-const itemTypesEnumerations = require('../../../enumerations/itemTypes');
 
 routes.post('/', async (req, res) => {
     const signature = req.headers['stripe-signature'];
@@ -90,7 +89,8 @@ routes.post('/', async (req, res) => {
             await req.db.collection('sales').insertOne({
                 user_id: user._id,
                 category: item ? 'items' : 'collections',
-                id: item ? item._id : collection._id,
+                item_id: item ? item._id : null,
+                collection_id: collection ? collection._id : null,
                 bought_by: paymentIntent.metadata.email,
                 bought_for: item ? item.price : collection.price,
                 created_at: Date.now(),

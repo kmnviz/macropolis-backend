@@ -24,6 +24,8 @@ routes.delete('/', jwtVerifyMiddleware, async (req, res) => {
             });
         }
 
+
+
         const googleCloudStorageClient = new GoogleCloudStorageClient();
         const audioFile = await googleCloudStorageClient.audioBucket.file(item.audio);
         const audioPreviewFile = await googleCloudStorageClient.audioPreviewBucket.file(item.audio_preview);

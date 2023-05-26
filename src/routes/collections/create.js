@@ -5,6 +5,7 @@ const routes = express.Router();
 const jwtVerifyMiddleware = require('../../middlewares/jwtVerify');
 const ImageManager = require('../../services/imageManager');
 const itemTypesEnumerations = require('../../enumerations/itemTypes');
+const {ObjectId} = require("mongodb");
 
 routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
@@ -41,7 +42,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
             record.user_id = req.user.id;
             record.username = req.user.username;
             record.type = fields.type;
-            record.items = fields.items;
+            record.items = fields.items.map((item) => new ObjectId(item));
             if (fields?.name) record.name = fields.name;
             if (fields?.price) record.price = Decimal(fields.price).mul(100).toString();
             if (fields?.description) record.description = fields.description;
