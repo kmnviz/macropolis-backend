@@ -24,7 +24,15 @@ routes.delete('/', jwtVerifyMiddleware, async (req, res) => {
             });
         }
 
+        const itemExistsInCollection = await req.db.collection('collections').findOne({
+            items: { $in: [item._id] }
+        });
 
+        if (itemExistsInCollection) {
+            return res.status(406).json({
+                message: 'Item persists in a collection. You first need to delete the collection'
+            });
+        }
 
         const googleCloudStorageClient = new GoogleCloudStorageClient();
         const audioFile = await googleCloudStorageClient.audioBucket.file(item.audio);
