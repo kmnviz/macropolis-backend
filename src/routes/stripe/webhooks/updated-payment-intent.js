@@ -18,34 +18,93 @@ routes.post('/', async (req, res) => {
         if (event.type === 'payment_intent.succeeded') {
             const paymentIntent = event.data.object;
 
-            let item, user;
-            item = await req.db.collection('items').findOne({_id: new ObjectId(paymentIntent.metadata.item_id)});
-            if (item) {
-                user = await req.db.collection('users').findOne({_id: new ObjectId(item.user_id)});
+            let item, user, collection, items = [];
+
+            if (paymentIntent.metadata?.item_id) {
+                item = await req.db.collection('items').findOne({
+                    _id: new ObjectId(paymentIntent.metadata.item_id)
+                });
+
+                if (!item) {
+                    console.log(`Webhook for non-existing item ${paymentIntent.metadata.item_id} received. PaymentIntent: ${paymentIntent.id}`);
+                    return res.status(200).json({
+                        message: 'Something went wrong'
+                    });
+                }
+
+                user = await req.db.collection('users').findOne({
+                    _id: new ObjectId(item.user_id)
+                });
+                items.push(item);
+            } else if (paymentIntent.metadata?.collection_id) {
+                collection = await req.db.collection('collections').findOne({
+                    _id: new ObjectId(paymentIntent.metadata.collection_id)
+                });
+                user = await req.db.collection('users').findOne({
+                    _id: new ObjectId(collection.user_id)
+                });
+                items = await req.db.collection('items').find({
+                    _id: {
+                        $in: collection.items.map((item) => new ObjectId(item))
+                    }
+                }).toArray();
+
+                if (!items.length) {
+                    console.log(`Webhook for collection with no items ${paymentIntent.metadata.collection_id} received. PaymentIntent: ${paymentIntent.id}`);
+                    return res.status(400).json({
+                        message: 'Something went wrong'
+                    });
+                }
             } else {
-                console.log(`Webhook for non-existing item ${paymentIntent.metadata.item_id} received. PaymentIntent: ${paymentIntent.id}`);
+                console.log(`Webhook with no itemId or collectionId received. PaymentIntent: ${paymentIntent.id}`);
                 return res.status(200).json({
                     message: 'Something went wrong'
                 });
             }
 
             const googleCloudStorageClient = new GoogleCloudStorageClient();
-            const filename = item[itemTypesEnumerations[item.type.toUpperCase()]].split('.').shift();
-            const fileExtension = item[itemTypesEnumerations[item.type.toUpperCase()]].split('.').pop();
 
-            const signedUrl = await googleCloudStorageClient.generateSignedUrl(filename, item.type, fileExtension);
-            const mailManager = new MailManager();
-            await mailManager.sendDownloadLink(paymentIntent.metadata.email, signedUrl, fileExtension, paymentIntent.metadata.item_id, user.username);
-            await mailManager.sendPurchasedItemMessage(user.email, item.name, item.price);
+            const filesForDownload = [];
+            for (let i = 0; i < items.length; i++) {
+                const filename = items[i][items[i].type].split('.').shift();
+                const fileExtension = items[i][items[i].type].split('.').pop();
+                const signedUrl = await googleCloudStorageClient.generateSignedUrl(filename, items[i].type, fileExtension);
+                filesForDownload.push({
+                    name: items[i].name,
+                    image: items[i].image,
+                    signed_url: signedUrl,
+                    file_extension: fileExtension,
+                });
+            }
+
+            const downloadId = new ObjectId();
+            await req.db.collection('downloads').insertOne({
+                _id: downloadId,
+                files: filesForDownload,
+                username: user.username,
+                name: item ? item.name : collection.name,
+                image: item ? item.image : collection.image,
+                created_at: Date.now(),
+            });
 
             await req.db.collection('sales').insertOne({
                 user_id: user._id,
-                item_id: item._id,
+                category: item ? 'items' : 'collections',
+                id: item ? item._id : collection._id,
                 bought_by: paymentIntent.metadata.email,
-                bought_for: item.price,
+                bought_for: item ? item.price : collection.price,
                 created_at: Date.now(),
-                stripe_fee: StripeClient.fee(item.price),
+                stripe_fee: StripeClient.fee(item ? item.price : collection.price),
             });
+
+            const mailManager = new MailManager();
+            await mailManager.sendDownloadLink(paymentIntent.metadata.email, downloadId);
+
+            if (item) {
+                await mailManager.sendPurchasedItemMessage(user.email, item.name, item.price);
+            } else {
+                await mailManager.sendPurchasedCollectionMessage(user.email, collection.name, collection.price);
+            }
 
             return res.status(200).json({
                 data: {},

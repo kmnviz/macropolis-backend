@@ -9,6 +9,7 @@ const salesRoutes = require('./sales');
 const plansRoutes = require('./plans');
 const withdrawalsRoutes = require('./withdrawals');
 const collectionsRoutes = require('./collections');
+const downloadsRoutes = require('./downloads');
 
 router.use('/users', usersRoutes);
 router.use('/profiles', profilesRoutes);
@@ -18,5 +19,6 @@ router.use('/sales', salesRoutes);
 router.use('/plans', plansRoutes);
 router.use('/withdrawals', withdrawalsRoutes);
 router.use('/collections', collectionsRoutes);
+router.use('/downloads', downloadsRoutes);
 
 module.exports = router;

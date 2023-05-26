@@ -54,12 +54,12 @@ class MailManager {
         });
     }
 
-    async sendDownloadLink(email, signedUrl, fileExtension, itemId, username) {
+    async sendDownloadLink(email, downloadId) {
         const mailOptions = {
             from: process.env.MAIL_USERNAME,
             to: email,
-            subject: `You have just bought a product from ${process.env.APP_NAME}`,
-            html: `<p>Download file from <a href="${process.env.FRONTEND_URL}/download?downloadUrl=${encodeURIComponent(signedUrl)}&fileExtension=${fileExtension}&itemId=${itemId}&username=${username}">this link</a>. The link will be available 7 days</p>`,
+            subject: `You have just bought a collection from ${process.env.APP_NAME}`,
+            html: `<p>Download file from <a href="${process.env.FRONTEND_URL}/download?id=${downloadId}">this link</a>. The link will be available 7 days</p>`,
         };
 
         await this._client.sendMail(mailOptions, (error, info) => {
@@ -79,6 +79,25 @@ class MailManager {
             to: email,
             subject: `Your item ${itemName} has been purchased`,
             html: `<p>${itemName} was purchased on ${process.env.APP_NAME}. You have earned ${itemPrice}</p>`,
+        };
+
+        await this._client.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                throw new Error(error);
+            } else {
+                if (info.response !== 'info') {
+                    throw new Error('Something went wrong, not received status 250');
+                }
+            }
+        });
+    }
+
+    async sendPurchasedCollectionMessage(email, collectionName, collectionPrice) {
+        const mailOptions = {
+            from: process.env.MAIL_USERNAME,
+            to: email,
+            subject: `Your collection ${collectionName} has been purchased`,
+            html: `<p>${collectionName} was purchased on ${process.env.APP_NAME}. You have earned ${collectionPrice}</p>`,
         };
 
         await this._client.sendMail(mailOptions, (error, info) => {
