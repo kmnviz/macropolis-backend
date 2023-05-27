@@ -31,6 +31,12 @@ routes.get('/', async (req, res) => {
             item.stripe_fee = StripeClient.fee(item.price);
         }
 
+        if (req.query?.withCollections) {
+            item.collections = await req.db.collection('collections').find({
+                items: { $in: [item._id] }
+            }).toArray();
+        }
+
         return res.status(200).json({
             data: { item: item },
             message: 'Item was fetched'
