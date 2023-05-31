@@ -10,6 +10,7 @@ const plansRoutes = require('./plans');
 const withdrawalsRoutes = require('./withdrawals');
 const collectionsRoutes = require('./collections');
 const downloadsRoutes = require('./downloads');
+const nftRoutes = require('./nft');
 
 router.use('/users', usersRoutes);
 router.use('/profiles', profilesRoutes);
@@ -20,5 +21,6 @@ router.use('/plans', plansRoutes);
 router.use('/withdrawals', withdrawalsRoutes);
 router.use('/collections', collectionsRoutes);
 router.use('/downloads', downloadsRoutes);
+router.use('/nft', nftRoutes);
 
 module.exports = router;

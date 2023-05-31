@@ -4,7 +4,6 @@ const jwtVerifyMiddleware = require('../../middlewares/jwtVerify');
 const Decimal = require('decimal.js');
 const {ObjectId} = require('mongodb');
 const withdrawalStatuses = require('../../enumerations/withdrawalStatuses');
-const AnyApiClient = require('../../clients/anyApiClient');
 const validateIban = require('../../helpers/validateIban');
 
 routes.post('/', jwtVerifyMiddleware, async (req, res) => {
@@ -18,6 +17,10 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
         if (!fields?.iban) {
             return res.status(422).json({ message: 'Missing parameter' });
+        }
+
+        if (!validateIban(fields.iban)) {
+            return res.status(422).json({ message: 'Invalid IBAN' });
         }
 
         try {
@@ -36,10 +39,6 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
 
             if (new Decimal(availableAmount).lte(0)) {
                 return res.status(422).json({ message: 'Not enough amount' });
-            }
-
-            if (!validateIban(fields.iban)) {
-                return res.status(422).json({ message: 'Invalid IBAN' });
             }
 
             const withdrawal = await req.db.collection('withdrawals').insertOne({
