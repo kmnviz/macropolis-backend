@@ -12,7 +12,6 @@ routes.use((req, res) => {
     try {
         res.send(healthcheck);
     } catch (error) {
-        // TODO notify via telegram
         healthcheck.message = error;
         res.status(503).send();
     }
