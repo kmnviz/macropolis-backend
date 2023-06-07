@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const healthcheckerRoute = require('./healthcheck');
 const usersRoutes = require('./users');
 const profilesRoutes = require('./profiles');
 const itemsRoutes = require('./items');
@@ -12,6 +13,7 @@ const collectionsRoutes = require('./collections');
 const downloadsRoutes = require('./downloads');
 const nftRoutes = require('./nft');
 
+router.use('/healthcheck', healthcheckerRoute)
 router.use('/users', usersRoutes);
 router.use('/profiles', profilesRoutes);
 router.use('/items', itemsRoutes);
