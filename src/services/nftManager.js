@@ -1,38 +1,34 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
 const GoogleCloudStorageClient = require('../clients/googleCloudStorageClient');
+const fs = require('fs');
+const crypto = require('crypto');
 
-class AudioManager {
+class NftManager {
 
-    validateAudio(file, size) {
-        const allowedExtensions = ['.wav', '.flac', '.aiff'];
-        const extension = path.extname(file.originalFilename);
-        const mimetype = file.mimetype;
+    async storeJsonToBucket(data, filename) {
+        const googleCloudStorageClient = new GoogleCloudStorageClient();
 
-        if (!allowedExtensions.includes(extension) || !mimetype.startsWith('audio/')) {
-            return false;
+        try {
+            await googleCloudStorageClient.nftBucket.file(filename).save(JSON.stringify(data));
+
+            return filename;
+        } catch (error) {
+            throw new Error(error);
         }
-
-        return file.size <= size;
     }
 
-    async storeToBucket(file) {
+    async storeFileToBucket(file) {
         const googleCloudStorageClient = new GoogleCloudStorageClient();
 
         const newFilename = crypto.randomBytes(28).toString('hex');
         const fileExtension = file.originalFilename.split('.').pop();
         const filename = `${newFilename}.${fileExtension}`;
-        const bucketFile = googleCloudStorageClient.audioBucket.file(filename);
+        const bucketFile = googleCloudStorageClient.imagesBucket.file(filename);
         const stream = fs.createReadStream(file.filepath);
 
         const uploadPromise = new Promise((resolve, reject) => {
             let uploadedBytes = 0;
             stream.on('data', (chunk) => {
                 uploadedBytes += chunk.length;
-                const progress = Math.round((uploadedBytes / fs.statSync(file.filepath).size) * 100);
-                // TODO: handle upload progress further
-                // console.log(`Progress: ${progress}%`);
             });
             stream.pipe(bucketFile.createWriteStream())
                 .on('error', () => { reject() })
@@ -49,4 +45,4 @@ class AudioManager {
     }
 }
 
-module.exports = AudioManager;
+module.exports = NftManager;

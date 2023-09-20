@@ -62,7 +62,7 @@ class ImageManager {
 
             return `${newImageFilename}.${imageFileExtension}`;
         } catch (error) {
-            throw new error;
+            throw new Error(error);
         }
     }
 }

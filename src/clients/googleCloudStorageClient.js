@@ -66,6 +66,18 @@ class GoogleCloudStorageClient {
         return `https://storage.googleapis.com/${process.env.GCP_STORAGE_ARCHIVE_BUCKET}`;
     }
 
+    get nftBucket() {
+        return this._client.bucket(process.env.GCP_STORAGE_NFT_BUCKET);
+    }
+
+    get nftBucketName() {
+        return process.env.GCP_STORAGE_NFT_BUCKET;
+    }
+
+    get nftBucketPath() {
+        return `https://storage.googleapis.com/${process.env.GCP_STORAGE_NFT_BUCKET}`;
+    }
+
     async generateSignedUrl(name, itemType, extension) {
         const options = {
             version: 'v4',

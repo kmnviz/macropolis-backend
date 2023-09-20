@@ -25,6 +25,8 @@ routes.get('/', async (req, res) => {
         const alchemyClient = new AlchemyClient();
         const nftMetadataResponse = await alchemyClient.getNftMetadata(contractAddress, tokenId);
 
+        console.log(nftMetadataResponse);
+
         if (nftMetadataResponse.media.length === 0) {
             return res.status(404).json({ message: 'Hash not found' });
         }

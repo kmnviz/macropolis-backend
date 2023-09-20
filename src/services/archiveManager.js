@@ -45,7 +45,7 @@ class ArchiveManager {
 
             return `${newFilename}.${fileExtension}`;
         } catch (error) {
-            throw new error;
+            throw new Error(error);
         }
     }
 }
