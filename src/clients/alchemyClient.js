@@ -2,10 +2,10 @@ const { Network, Alchemy } = require('alchemy-sdk');
 
 class AlchemyClient {
 
-    constructor() {
+    constructor(network) {
         this._client = new Alchemy({
             apiKey: process.env.ALCHEMY_API_KEY,
-            network: Network.ETH_MAINNET,
+            network: network,
         });
     }
 

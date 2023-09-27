@@ -1,6 +1,7 @@
 const express = require('express');
 const routes = express.Router();
 const AlchemyClient = require('../../clients/alchemyClient');
+const alchemyNetworksEnumerations = require('../../enumerations/alchemyNetworks');
 
 routes.get('/', async (req, res) => {
 
@@ -26,11 +27,13 @@ routes.get('/', async (req, res) => {
             && nft?.collection
             && nft.collection.length > 0
         ) {
-            const alchemyClient = new AlchemyClient();
+            const alchemyClientEthereumMainnet = new AlchemyClient(alchemyNetworksEnumerations.ethereumMainnet);
+            const alchemyClientPolygonMumbai = new AlchemyClient(alchemyNetworksEnumerations.polygonMumbai);
             const nftsPromises = [];
 
             for (let i = 0; i < nft.owner.length; i++) {
-                nftsPromises.push(alchemyClient.getNfts(nft.owner[i], nft.collection));
+                nftsPromises.push(alchemyClientEthereumMainnet.getNfts(nft.owner[i], nft.collection));
+                nftsPromises.push(alchemyClientPolygonMumbai.getNfts(nft.owner[i], nft.collection));
             }
 
             const nftsResponse = await Promise.all(nftsPromises);

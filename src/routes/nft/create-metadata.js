@@ -50,7 +50,8 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
         nftMetadata.contract.tokenType = 'ERC721';
         nftMetadata.media = {};
         nftMetadata.media.filename = `${crypto.randomBytes(28).toString('hex')}.json`
-        nftMetadata.tokenUri = `${googleCloudStorageClient.nftBucketPath}/${nftMetadata.media.filename}`;
+        // nftMetadata.tokenUri = `${googleCloudStorageClient.nftBucketPath}/${nftMetadata.media.filename}`;
+        nftMetadata.tokenUri = `${nftMetadata.media.filename}`;
 
         try {
             if (fields.type === nftTypesEnumerations.IMAGE) {
@@ -60,7 +61,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 }
 
                 const imageUrl = await nftManager.storeFileToBucket(files.nft);
-                nftMetadata.media.imageUrl = `${googleCloudStorageClient.imagesBucketPath}/${imageUrl}`;
+                nftMetadata.media.image = `${googleCloudStorageClient.imagesBucketPath}/${imageUrl}`;
             }
 
             if (!imageManager.validateImage(files.image, 10240 * 10240)) {
@@ -68,7 +69,7 @@ routes.post('/', jwtVerifyMiddleware, async (req, res) => {
                 return res.status(422).json({ message: 'Wrong parameter' });
             } else {
                 const thumbnailUrl = await imageManager.storeToBucket(files.nft);
-                nftMetadata.media.thumbnailUrl = `480_${googleCloudStorageClient.imagesBucketPath}/${thumbnailUrl}`;
+                nftMetadata.media.thumbnail = `${googleCloudStorageClient.imagesBucketPath}/480_${thumbnailUrl}`;
             }
 
             await nftManager.storeJsonToBucket(nftMetadata, nftMetadata.media.filename);
